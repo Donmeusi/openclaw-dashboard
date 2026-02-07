@@ -190,7 +190,7 @@ Der Editor unterstützt:
 
 - **Path Traversal Protection:** Alle Dateipfade werden mit `path.basename()` bereinigt
 - **CORS:** Aktiviert für localhost-Entwicklung
-- **Workspace-Isolation:** Zugriff nur auf `/Users/donmeusi/.openclaw/workspace`
+- **Workspace-Isolation:** Zugriff nur auf konfigurierten Workspace-Pfad (in `server/index.js` anpassbar)
 
 ---
 
@@ -219,7 +219,8 @@ lsof -ti:3001 | xargs kill -9
 ### 404 beim Öffnen des Editors
 Überprüfe, ob die Datei im Workspace existiert:
 ```bash
-ls ~/.openclaw/workspace/*.md
+ls ~/openclaw-workspace/*.md
+# oder je nach Konfiguration in server/index.js
 ```
 
 ---
