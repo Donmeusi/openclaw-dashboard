@@ -3,6 +3,39 @@ const cors = require('cors');
 const fs = require('fs').promises;
 const path = require('path');
 
+const DEFAULT_PROJECTS = {
+  todo: {
+    id: 'todo',
+    title: '📋 To Do',
+    items: [
+      { id: '1', title: 'Dashboard UI verfeinern', tags: ['ui', 'react'], priority: 'high' },
+      { id: '2', title: 'API-Endpoints dokumentieren', tags: ['docs'], priority: 'medium' },
+    ]
+  },
+  progress: {
+    id: 'progress',
+    title: '🔨 In Progress',
+    items: [
+      { id: '3', title: 'File-Editor mit Syntax-Highlighting', tags: ['feature'], priority: 'high' },
+    ]
+  },
+  review: {
+    id: 'review',
+    title: '👀 Review',
+    items: [
+      { id: '4', title: 'GitHub Dark Theme implementieren', tags: ['design'], priority: 'medium' },
+    ]
+  },
+  done: {
+    id: 'done',
+    title: '✅ Done',
+    items: [
+      { id: '5', title: 'Backend API erstellen', tags: ['backend'], priority: 'high' },
+      { id: '6', title: 'Projektstruktur aufsetzen', tags: ['setup'], priority: 'high' },
+    ]
+  }
+};
+
 const app = express();
 const PORT = 3001;
 const WORKSPACE_PATH = '/Users/donmeusi/.openclaw/workspace';
@@ -125,6 +158,36 @@ app.get('/api/status', (req, res) => {
     uptime: process.uptime(),
     workspace: WORKSPACE_PATH
   });
+});
+
+// Get projects data
+app.get('/api/projects', async (req, res) => {
+  try {
+    const projectsPath = path.join(WORKSPACE_PATH, 'dashboard', 'projects.json');
+    try {
+      const data = await fs.readFile(projectsPath, 'utf-8');
+      const projects = JSON.parse(data);
+      res.json(projects);
+    } catch {
+      // Return defaults if file doesn't exist
+      res.json(DEFAULT_PROJECTS);
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Save projects data
+app.post('/api/projects', async (req, res) => {
+  try {
+    const { projects } = req.body;
+    const projectsPath = path.join(WORKSPACE_PATH, 'dashboard', 'projects.json');
+    
+    await fs.writeFile(projectsPath, JSON.stringify(projects, null, 2), 'utf-8');
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 app.listen(PORT, () => {

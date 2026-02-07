@@ -1,37 +1,5 @@
-import React, { useState } from 'react';
-
-const INITIAL_COLUMNS = {
-  todo: {
-    id: 'todo',
-    title: '📋 To Do',
-    items: [
-      { id: '1', title: 'Dashboard UI verfeinern', tags: ['ui', 'react'], priority: 'high' },
-      { id: '2', title: 'API-Endpoints dokumentieren', tags: ['docs'], priority: 'medium' },
-    ]
-  },
-  progress: {
-    id: 'progress',
-    title: '🔨 In Progress',
-    items: [
-      { id: '3', title: 'File-Editor mit Syntax-Highlighting', tags: ['feature'], priority: 'high' },
-    ]
-  },
-  review: {
-    id: 'review',
-    title: '👀 Review',
-    items: [
-      { id: '4', title: 'GitHub Dark Theme implementieren', tags: ['design'], priority: 'medium' },
-    ]
-  },
-  done: {
-    id: 'done',
-    title: '✅ Done',
-    items: [
-      { id: '5', title: 'Backend API erstellen', tags: ['backend'], priority: 'high' },
-      { id: '6', title: 'Projektstruktur aufsetzen', tags: ['setup'], priority: 'high' },
-    ]
-  }
-};
+import React, { useState, useEffect } from 'react';
+import { fetchProjects, saveProjects } from '../utils/api';
 
 const PRIORITY_COLORS = {
   high: '#f85149',
@@ -49,10 +17,62 @@ const TAG_COLORS = {
   setup: '#3fb950',
 };
 
+const INITIAL_COLUMNS = {
+  todo: {
+    id: 'todo',
+    title: '📋 To Do',
+    items: []
+  },
+  progress: {
+    id: 'progress',
+    title: '🔨 In Progress',
+    items: []
+  },
+  review: {
+    id: 'review',
+    title: '👀 Review',
+    items: []
+  },
+  done: {
+    id: 'done',
+    title: '✅ Done',
+    items: []
+  }
+};
+
 export default function ProjectBoard() {
   const [columns, setColumns] = useState(INITIAL_COLUMNS);
   const [newTask, setNewTask] = useState('');
   const [draggedItem, setDraggedItem] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    loadProjects();
+  }, []);
+
+  const loadProjects = async () => {
+    try {
+      const data = await fetchProjects();
+      setColumns(data);
+    } catch (err) {
+      console.error('Failed to load projects:', err);
+      setColumns(INITIAL_COLUMNS);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const persistProjects = async (newColumns) => {
+    setSaving(true);
+    try {
+      await saveProjects(newColumns);
+    } catch (err) {
+      console.error('Failed to save projects:', err);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleAddTask = (columnId) => {
     if (!newTask.trim()) return;
@@ -64,13 +84,16 @@ export default function ProjectBoard() {
       priority: 'medium'
     };
     
-    setColumns(prev => ({
-      ...prev,
+    const updated = {
+      ...columns,
       [columnId]: {
-        ...prev[columnId],
-        items: [...prev[columnId].items, task]
+        ...columns[columnId],
+        items: [...columns[columnId].items, task]
       }
-    }));
+    };
+    
+    setColumns(updated);
+    persistProjects(updated);
     setNewTask('');
   };
 
@@ -84,33 +107,55 @@ export default function ProjectBoard() {
     const { item, sourceColumn } = draggedItem;
     if (sourceColumn === targetColumnId) return;
     
-    setColumns(prev => ({
-      ...prev,
+    const updated = {
+      ...columns,
       [sourceColumn]: {
-        ...prev[sourceColumn],
-        items: prev[sourceColumn].items.filter(i => i.id !== item.id)
+        ...columns[sourceColumn],
+        items: columns[sourceColumn].items.filter(i => i.id !== item.id)
       },
       [targetColumnId]: {
-        ...prev[targetColumnId],
-        items: [...prev[targetColumnId].items, item]
+        ...columns[targetColumnId],
+        items: [...columns[targetColumnId].items, item]
       }
-    }));
+    };
     
+    setColumns(updated);
+    persistProjects(updated);
     setDraggedItem(null);
+  };
+
+  const handleDeleteTask = (columnId, taskId) => {
+    const updated = {
+      ...columns,
+      [columnId]: {
+        ...columns[columnId],
+        items: columns[columnId].items.filter(i => i.id !== taskId)
+      }
+    };
+    setColumns(updated);
+    persistProjects(updated);
   };
 
   return (
     <div>
       <div className="flex items-center justify-between mb-4 pb-4 border-b" style={{ borderColor: '#30363d' }}>
-        <h2 style={{ color: '#f0f6fc', fontSize: '20px', fontWeight: 600 }}>
-          📁 Projekt-Verwaltung
-        </h2>
+        <div className="flex items-center gap-3">
+          <h2 style={{ color: '#f0f6fc', fontSize: '20px', fontWeight: 600 }}>
+            📁 Projekt-Verwaltung
+          </h2>
+          {saving && (
+            <span style={{ color: '#8b949e', fontSize: '12px' }}>
+              💾 Speichern...
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-2">
           <input
             type="text"
             value={newTask}
             onChange={(e) => setNewTask(e.target.value)}
             placeholder="Neue Aufgabe..."
+            disabled={loading}
             style={{
               background: '#0d1117',
               border: '1px solid #30363d',
@@ -125,11 +170,18 @@ export default function ProjectBoard() {
           <button 
             onClick={() => handleAddTask('todo')}
             className="github-btn github-btn-primary"
+            disabled={loading}
           >
             + Hinzufügen
           </button>
         </div>
       </div>
+
+      {loading && (
+        <div style={{ color: '#8b949e', padding: '20px', textAlign: 'center' }}>
+          Projekte werden geladen...
+        </div>
+      )}
 
       {/* Kanban Board */}
       <div className="grid grid-cols-4 gap-4">
@@ -169,14 +221,30 @@ export default function ProjectBoard() {
                   }}
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <h4 style={{ color: '#f0f6fc', fontSize: '13px', fontWeight: 500, lineHeight: 1.4 }}>
+                    <h4 style={{ color: '#f0f6fc', fontSize: '13px', fontWeight: 500, lineHeight: 1.4, flex: 1 }}>
                       {item.title}
                     </h4>
-                    <span 
-                      className="w-2 h-2 rounded-full flex-shrink-0"
-                      style={{ background: PRIORITY_COLORS[item.priority] }}
-                      title={`Priorität: ${item.priority}`}
-                    ></span>
+                    <div className="flex items-center gap-1">
+                      <span 
+                        className="w-2 h-2 rounded-full flex-shrink-0"
+                        style={{ background: PRIORITY_COLORS[item.priority] }}
+                        title={`Priorität: ${item.priority}`}
+                      ></span>
+                      <button
+                        onClick={() => handleDeleteTask(column.id, item.id)}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#8b949e',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          padding: '0 4px'
+                        }}
+                        title="Löschen"
+                      >
+                        ×
+                      </button>
+                    </div>
                   </div>
 
                   <div className="flex flex-wrap gap-1">

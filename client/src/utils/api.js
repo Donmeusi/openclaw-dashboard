@@ -38,3 +38,20 @@ export async function saveFile(filename, content) {
   if (!res.ok) throw new Error('Save failed');
   return res.json();
 }
+
+// Project Board API
+export async function fetchProjects() {
+  const res = await fetch(`${API_BASE}/projects`);
+  if (!res.ok) throw new Error('Projects fetch failed');
+  return res.json();
+}
+
+export async function saveProjects(projects) {
+  const res = await fetch(`${API_BASE}/projects`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ projects }),
+  });
+  if (!res.ok) throw new Error('Save projects failed');
+  return res.json();
+}

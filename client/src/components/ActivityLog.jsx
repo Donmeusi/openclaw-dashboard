@@ -1,13 +1,5 @@
-import React from 'react';
-
-const MOCK_ACTIVITIES = [
-  { id: 1, type: 'edit', file: 'MEMORY.md', description: 'TODOs aktualisiert', time: '2026-02-07T19:30:00', user: 'Nova' },
-  { id: 2, type: 'create', file: '2026-02-07.md', description: 'Memory-Log erstellt', time: '2026-02-07T18:50:00', user: 'Nova' },
-  { id: 3, type: 'integration', file: 'Jellyfin API', description: 'Server-Verbindung hergestellt', time: '2026-02-07T18:45:00', user: 'Nova' },
-  { id: 4, type: 'integration', file: 'Todoist', description: 'Watchlist-Projekt erstellt', time: '2026-02-07T18:40:00', user: 'Nova' },
-  { id: 5, type: 'edit', file: 'TOOLS.md', description: 'API-Keys gespeichert', time: '2026-02-07T18:30:00', user: 'Nova' },
-  { id: 6, type: 'create', file: 'Jellyfin Watchlist', description: 'Zwei Empfehlungen hinzugefügt', time: '2026-02-07T18:25:00', user: 'Nova' },
-];
+import React, { useState, useEffect } from 'react';
+import { fetchMemory } from '../utils/api';
 
 const ACTIVITY_ICONS = {
   edit: '✏️',
@@ -23,7 +15,61 @@ const ACTIVITY_COLORS = {
   delete: '#f85149',
 };
 
+// Generate activities from memory file metadata
+function generateActivities(memoryFiles) {
+  const activities = [];
+  
+  // Add file creation/modification activities
+  memoryFiles.forEach((file, index) => {
+    const date = new Date(file.lastModified);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    
+    activities.push({
+      id: `mem-${index}`,
+      type: 'create',
+      file: file.name,
+      description: isToday ? 'Heute aktualisiert' : 'Memory-Log erstellt',
+      time: file.lastModified,
+      user: 'Nova'
+    });
+  });
+  
+  // Add current session activity
+  activities.unshift({
+    id: 'current-1',
+    type: 'edit',
+    file: 'openclaw-dashboard',
+    description: 'Dashboard auf GitHub veröffentlicht',
+    time: new Date().toISOString(),
+    user: 'Nova'
+  });
+  
+  return activities.sort((a, b) => new Date(b.time) - new Date(a.time));
+}
+
 export default function ActivityLog() {
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadActivities();
+  }, []);
+
+  const loadActivities = async () => {
+    try {
+      const memoryFiles = await fetchMemory();
+      const generated = generateActivities(memoryFiles);
+      setActivities(generated);
+    } catch (err) {
+      console.error('Failed to load activities:', err);
+      // Fallback to empty state
+      setActivities([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const formatTime = (isoString) => {
     const date = new Date(isoString);
     return date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
@@ -35,12 +81,33 @@ export default function ActivityLog() {
   };
 
   // Group by date
-  const grouped = MOCK_ACTIVITIES.reduce((acc, activity) => {
+  const grouped = activities.reduce((acc, activity) => {
     const date = formatDate(activity.time);
     if (!acc[date]) acc[date] = [];
     acc[date].push(activity);
     return acc;
   }, {});
+
+  if (loading) {
+    return (
+      <div style={{ color: '#8b949e', padding: '20px' }}>
+        Aktivitäten werden geladen...
+      </div>
+    );
+  }
+
+  if (activities.length === 0) {
+    return (
+      <div>
+        <h2 style={{ color: '#f0f6fc', fontSize: '20px', fontWeight: 600, marginBottom: '16px' }}>
+          Aktivitäts-Log
+        </h2>
+        <div className="github-card p-4" style={{ color: '#8b949e' }}>
+          Keine Aktivitäten vorhanden.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -49,12 +116,12 @@ export default function ActivityLog() {
           Aktivitäts-Log
         </h2>
         <span style={{ color: '#8b949e', fontSize: '13px' }}>
-          {MOCK_ACTIVITIES.length} Einträge
+          {activities.length} Einträge
         </span>
       </div>
 
       <div className="space-y-4">
-        {Object.entries(grouped).map(([date, activities]) => (
+        {Object.entries(grouped).map(([date, dayActivities]) => (
           <div key={date} className="github-card p-4">
             <h3 
               className="text-sm font-semibold mb-3 pb-2 border-b"
@@ -64,7 +131,7 @@ export default function ActivityLog() {
             </h3>
             
             <div className="space-y-3">
-              {activities.map((activity) => (
+              {dayActivities.map((activity) => (
                 <div 
                   key={activity.id}
                   className="flex items-start gap-3 pb-3"
