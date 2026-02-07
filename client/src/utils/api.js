@@ -39,19 +39,53 @@ export async function saveFile(filename, content) {
   return res.json();
 }
 
-// Project Board API
+// ============ PROJECTS API ============
+
 export async function fetchProjects() {
   const res = await fetch(`${API_BASE}/projects`);
   if (!res.ok) throw new Error('Projects fetch failed');
   return res.json();
 }
 
-export async function saveProjects(projects) {
-  const res = await fetch(`${API_BASE}/projects`, {
+export async function fetchProject(id) {
+  const res = await fetch(`${API_BASE}/projects/${id}`);
+  if (!res.ok) throw new Error('Project fetch failed');
+  return res.json();
+}
+
+export async function createProject(name, description = '') {
+  const res = await fetch(`${API_BASE}/projects/create`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ projects }),
+    body: JSON.stringify({ name, description }),
   });
-  if (!res.ok) throw new Error('Save projects failed');
+  if (!res.ok) throw new Error('Create project failed');
+  return res.json();
+}
+
+export async function saveProject(id, columns) {
+  const res = await fetch(`${API_BASE}/projects/${id}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ columns }),
+  });
+  if (!res.ok) throw new Error('Save project failed');
+  return res.json();
+}
+
+export async function setActiveProject(id) {
+  const res = await fetch(`${API_BASE}/projects/active/${id}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!res.ok) throw new Error('Set active project failed');
+  return res.json();
+}
+
+export async function deleteProject(id) {
+  const res = await fetch(`${API_BASE}/projects/${id}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error('Delete project failed');
   return res.json();
 }
