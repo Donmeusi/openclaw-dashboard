@@ -302,7 +302,7 @@ app.post('/api/projects/active/:id', async (req, res) => {
     
     res.json({ success: true, activeProjectId: id });
   } catch (error) {
-    res.status(500).json({ error: error.message } });
+    res.status(500).json({ error: error.message });
   }
 });
 
