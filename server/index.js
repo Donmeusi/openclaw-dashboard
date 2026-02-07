@@ -45,32 +45,22 @@ const createDefaultProjects = () => ({
         todo: {
           id: 'todo',
           title: '📋 To Do',
-          items: [
-            { id: '1', title: 'Dashboard UI verfeinern', tags: ['ui', 'react'], priority: 'high' },
-            { id: '2', title: 'API-Endpoints dokumentieren', tags: ['docs'], priority: 'medium' },
-          ]
+          items: []
         },
         progress: {
           id: 'progress',
           title: '🔨 In Progress',
-          items: [
-            { id: '3', title: 'File-Editor mit Syntax-Highlighting', tags: ['feature'], priority: 'high' },
-          ]
+          items: []
         },
         review: {
           id: 'review',
           title: '👀 Review',
-          items: [
-            { id: '4', title: 'GitHub Dark Theme implementieren', tags: ['design'], priority: 'medium' },
-          ]
+          items: []
         },
         done: {
           id: 'done',
           title: '✅ Done',
-          items: [
-            { id: '5', title: 'Backend API erstellen', tags: ['backend'], priority: 'high' },
-            { id: '6', title: 'Projektstruktur aufsetzen', tags: ['setup'], priority: 'high' },
-          ]
+          items: []
         }
       }
     }
@@ -190,7 +180,7 @@ app.get('/api/status', (req, res) => {
   res.json({
     status: 'available',
     lastSeen: new Date().toISOString(),
-    version: '2026.2.7-multi-project',
+    version: '2026.2.8-theme-toggle',
     model: 'ollama/kimi-k2.5:cloud',
     uptime: process.uptime(),
     workspace: WORKSPACE_PATH

@@ -11,6 +11,23 @@ function App() {
   const [status, setStatus] = useState(null);
   const [files, setFiles] = useState([]);
   const [selectedFile, setSelectedFile] = useState('MEMORY.md');
+  
+  // Theme state: 'dark' or 'light'
+  const [theme, setTheme] = useState(() => {
+    // Load from localStorage or default to dark
+    const saved = localStorage.getItem('dashboard-theme');
+    return saved || 'dark';
+  });
+
+  // Apply theme to document
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('dashboard-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
 
   useEffect(() => {
     loadStatus();
@@ -38,7 +55,7 @@ function App() {
   };
 
   return (
-    <div className="flex h-screen" style={{ background: '#0d1117' }}>
+    <div className="flex h-screen" style={{ background: 'var(--color-bg)' }}>
       <Sidebar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab}
@@ -51,7 +68,7 @@ function App() {
       />
       
       <div className="flex-1 flex flex-col overflow-hidden">
-        <StatusBar status={status} />
+        <StatusBar status={status} theme={theme} onToggleTheme={toggleTheme} />
         
         <main className="flex-1 overflow-auto p-6">
           {activeTab === 'editor' && (

@@ -47,22 +47,22 @@ export default function FileEditor({ filename }) {
   const isDirty = content !== originalContent;
   const filenameDisplay = filename.replace('memory/', '');
 
-  // Simple markdown highlighting (preview mode)
+  // Simple markdown highlighting (preview mode) - theme-aware
   const renderPreview = (text) => {
     return text
       .replace(/^(#{1,6})\s(.+)$/gm, (_, hashes, title) => {
         const level = hashes.length;
         const sizes = { 1: '28px', 2: '24px', 3: '20px', 4: '18px', 5: '16px', 6: '14px' };
-        return `<h${level} style="color:#f0f6fc;font-size:${sizes[level]};margin:16px 0 8px 0;border-bottom:1px solid #30363d;padding-bottom:8px;">${title}</h${level}>`;
+        return `<h${level} style="color:var(--color-text);font-size:${sizes[level]};margin:16px 0 8px 0;border-bottom:1px solid var(--color-border);padding-bottom:8px;">${title}</h${level}>`;
       })
-      .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#f0f6fc;">$1</strong>')
-      .replace(/\*(.+?)\*/g, '<em style="color:#c9d1d9;">$1</em>')
-      .replace(/`(.+?)`/g, '<code style="background:#343941;padding:2px 6px;border-radius:3px;color:#ff7b72;font-size:12px;">$1</code>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--color-text);">$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em style="color:var(--color-muted);">$1</em>')
+      .replace(/`(.+?)`/g, '<code style="background:var(--color-btn-bg);padding:2px 6px;border-radius:3px;color:var(--color-accent);font-size:12px;">$1</code>')
       .replace(/^- \[(x| )\]\s(.+)$/gm, (_, checked, text) => {
         const isChecked = checked === 'x';
-        return `<div style="display:flex;align-items:center;gap:8px;margin:4px 0;"><span style="color:${isChecked ? '#3fb950' : '#8b949e'};">${isChecked ? '☑' : '☐'}</span><span style="${isChecked ? 'text-decoration:line-through;color:#8b949e;' : ''}">${text}</span></div>`;
+        return `<div style="display:flex;align-items:center;gap:8px;margin:4px 0;"><span style="color:${isChecked ? '#3fb950' : 'var(--color-muted)'}">${isChecked ? '☑' : '☐'}</span><span style="${isChecked ? 'text-decoration:line-through;color:var(--color-muted);' : ''}">${text}</span></div>`;
       })
-      .replace(/^-\s(.+)$/gm, '<li style="margin:4px 0;color:#c9d1d9;">• $1</li>')
+      .replace(/^-\s(.+)$/gm, '<li style="margin:4px 0;color:var(--color-text);">• $1</li>')
       .replace(/\n/g, '<br>');
   };
 
@@ -70,9 +70,9 @@ export default function FileEditor({ filename }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64" style={{ color: '#8b949e' }}>
+      <div className="flex items-center justify-center h-64" style={{ color: 'var(--color-muted)' }}>
         <div className="animate-pulse flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full" style={{ background: '#58a6ff' }}></span>
+          <span className="w-2 h-2 rounded-full" style={{ background: 'var(--color-accent)' }}></span>
           Lade {filenameDisplay}...
         </div>
       </div>
@@ -83,7 +83,7 @@ export default function FileEditor({ filename }) {
     return (
       <div className="github-card p-6" style={{ color: '#f85149' }}>
         <p className="font-semibold mb-2">Fehler beim Laden</p>
-        <p style={{ color: '#8b949e' }}>{error}</p>
+        <p style={{ color: 'var(--color-muted)' }}>{error}</p>
         <button onClick={loadFile} className="github-btn mt-4">
           Erneut versuchen
         </button>
@@ -94,9 +94,9 @@ export default function FileEditor({ filename }) {
   return (
     <div>
       {/* Toolbar */}
-      <div className="flex items-center justify-between mb-4 pb-4 border-b" style={{ borderColor: '#30363d' }}>
+      <div className="flex items-center justify-between mb-4 pb-4 border-b" style={{ borderColor: 'var(--color-border)' }}>
         <div className="flex items-center gap-3">
-          <h2 style={{ color: '#f0f6fc', fontSize: '20px', fontWeight: 600 }}>
+          <h2 style={{ color: 'var(--color-text)', fontSize: '20px', fontWeight: 600 }}>
             {filenameDisplay}
           </h2>
           {isDirty && (
@@ -121,7 +121,7 @@ export default function FileEditor({ filename }) {
           <button
             onClick={() => setShowPreview(!showPreview)}
             className="github-btn"
-            style={{ background: showPreview ? '#30363d' : '#21262d' }}
+            style={{ background: showPreview ? 'var(--color-btn-hover)' : 'var(--color-btn-bg)' }}
           >
             {showPreview ? '✏️ Bearbeiten' : '👁️ Vorschau'}
           </button>
@@ -154,7 +154,7 @@ export default function FileEditor({ filename }) {
       )}
 
       {/* Stats */}
-      <div className="mt-3 text-xs" style={{ color: '#8b949e' }}>
+      <div className="mt-3 text-xs" style={{ color: 'var(--color-muted)' }}>
         {content.length} Zeichen • {content.split('\n').length} Zeilen
         {filename.startsWith('memory/') && (
           <span className="ml-3">📁 Memory-Log</span>

@@ -63,7 +63,6 @@ export default function ActivityLog() {
       setActivities(generated);
     } catch (err) {
       console.error('Failed to load activities:', err);
-      // Fallback to empty state
       setActivities([]);
     } finally {
       setLoading(false);
@@ -90,7 +89,7 @@ export default function ActivityLog() {
 
   if (loading) {
     return (
-      <div style={{ color: '#8b949e', padding: '20px' }}>
+      <div style={{ color: 'var(--color-muted)', padding: '20px' }}>
         Aktivitäten werden geladen...
       </div>
     );
@@ -99,10 +98,10 @@ export default function ActivityLog() {
   if (activities.length === 0) {
     return (
       <div>
-        <h2 style={{ color: '#f0f6fc', fontSize: '20px', fontWeight: 600, marginBottom: '16px' }}>
+        <h2 style={{ color: 'var(--color-text)', fontSize: '20px', fontWeight: 600, marginBottom: '16px' }}>
           Aktivitäts-Log
         </h2>
-        <div className="github-card p-4" style={{ color: '#8b949e' }}>
+        <div className="github-card p-4" style={{ color: 'var(--color-muted)' }}>
           Keine Aktivitäten vorhanden.
         </div>
       </div>
@@ -111,11 +110,11 @@ export default function ActivityLog() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4 pb-4 border-b" style={{ borderColor: '#30363d' }}>
-        <h2 style={{ color: '#f0f6fc', fontSize: '20px', fontWeight: 600 }}>
+      <div className="flex items-center justify-between mb-4 pb-4 border-b" style={{ borderColor: 'var(--color-border)' }}>
+        <h2 style={{ color: 'var(--color-text)', fontSize: '20px', fontWeight: 600 }}>
           Aktivitäts-Log
         </h2>
-        <span style={{ color: '#8b949e', fontSize: '13px' }}>
+        <span style={{ color: 'var(--color-muted)', fontSize: '13px' }}>
           {activities.length} Einträge
         </span>
       </div>
@@ -125,7 +124,7 @@ export default function ActivityLog() {
           <div key={date} className="github-card p-4">
             <h3 
               className="text-sm font-semibold mb-3 pb-2 border-b"
-              style={{ color: '#8b949e', borderColor: '#30363d' }}
+              style={{ color: 'var(--color-muted)', borderColor: 'var(--color-border)' }}
             >
               {date}
             </h3>
@@ -135,7 +134,7 @@ export default function ActivityLog() {
                 <div 
                   key={activity.id}
                   className="flex items-start gap-3 pb-3"
-                  style={{ borderBottom: '1px solid #21262d' }}
+                  style={{ borderBottom: '1px solid var(--color-border)' }}
                 >
                   <span className="text-lg">{ACTIVITY_ICONS[activity.type]}</span>
                   
@@ -150,21 +149,21 @@ export default function ActivityLog() {
                       >
                         {activity.type.toUpperCase()}
                       </span>
-                      <span style={{ color: '#58a6ff', fontSize: '13px', fontWeight: 500 }}>
+                      <span style={{ color: 'var(--color-accent)', fontSize: '13px', fontWeight: 500 }}>
                         {activity.file}
                       </span>
-                      <span style={{ color: '#8b949e', fontSize: '12px' }}>
+                      <span style={{ color: 'var(--color-muted)', fontSize: '12px' }}>
                         ({formatTime(activity.time)})
                       </span>
                     </div>
-                    <p style={{ color: '#c9d1d9', fontSize: '14px', marginTop: '4px' }}>
+                    <p style={{ color: 'var(--color-text)', fontSize: '14px', marginTop: '4px' }}>
                       {activity.description}
                     </p>
                   </div>
                   
                   <span 
                     className="text-xs px-2 py-1 rounded"
-                    style={{ background: '#21262d', color: '#8b949e' }}
+                    style={{ background: 'var(--color-btn-bg)', color: 'var(--color-muted)' }}
                   >
                     {activity.user}
                   </span>

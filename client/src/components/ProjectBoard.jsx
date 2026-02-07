@@ -200,7 +200,7 @@ export default function ProjectBoard() {
 
   if (loading) {
     return (
-      <div style={{ color: '#8b949e', padding: '40px', textAlign: 'center' }}>
+      <div style={{ color: 'var(--color-muted)', padding: '40px', textAlign: 'center' }}>
         Projekte werden geladen...
       </div>
     );
@@ -209,9 +209,9 @@ export default function ProjectBoard() {
   return (
     <div>
       {/* Header with Project Selector */}
-      <div className="flex items-center justify-between mb-4 pb-4 border-b" style={{ borderColor: '#30363d' }}>
+      <div className="flex items-center justify-between mb-4 pb-4 border-b" style={{ borderColor: 'var(--color-border)' }}>
         <div className="flex items-center gap-3">
-          <h2 style={{ color: '#f0f6fc', fontSize: '20px', fontWeight: 600 }}>
+          <h2 style={{ color: 'var(--color-text)', fontSize: '20px', fontWeight: 600 }}>
             📁 Projekt-Verwaltung
           </h2>
           
@@ -220,11 +220,11 @@ export default function ProjectBoard() {
             value={activeProjectId || ''}
             onChange={(e) => handleProjectSwitch(e.target.value)}
             style={{
-              background: '#0d1117',
-              border: '1px solid #30363d',
+              background: 'var(--color-bg)',
+              border: '1px solid var(--color-border)',
               borderRadius: '6px',
               padding: '6px 12px',
-              color: '#c9d1d9',
+              color: 'var(--color-text)',
               fontSize: '14px',
               cursor: 'pointer'
             }}
@@ -253,7 +253,7 @@ export default function ProjectBoard() {
             <button
               onClick={() => handleDeleteProject(activeProjectId)}
               style={{
-                background: '#21262d',
+                background: 'var(--color-btn-bg)',
                 border: '1px solid #f85149',
                 borderRadius: '6px',
                 padding: '6px 12px',
@@ -267,7 +267,7 @@ export default function ProjectBoard() {
           )}
           
           {saving && (
-            <span style={{ color: '#8b949e', fontSize: '12px' }}>
+            <span style={{ color: 'var(--color-muted)', fontSize: '12px' }}>
               💾 Speichern...
             </span>
           )}
@@ -280,11 +280,11 @@ export default function ProjectBoard() {
             onChange={(e) => setNewTask(e.target.value)}
             placeholder="Neue Aufgabe..."
             style={{
-              background: '#0d1117',
-              border: '1px solid #30363d',
+              background: 'var(--color-bg)',
+              border: '1px solid var(--color-border)',
               borderRadius: '6px',
               padding: '6px 12px',
-              color: '#c9d1d9',
+              color: 'var(--color-text)',
               fontSize: '13px',
               width: '200px'
             }}
@@ -301,7 +301,7 @@ export default function ProjectBoard() {
 
       {/* Project Description */}
       {activeProject?.description && (
-        <div style={{ color: '#8b949e', fontSize: '13px', marginBottom: '16px' }}>
+        <div style={{ color: 'var(--color-muted)', fontSize: '13px', marginBottom: '16px' }}>
           {activeProject.description}
         </div>
       )}
@@ -318,13 +318,13 @@ export default function ProjectBoard() {
           zIndex: 1000
         }}>
           <div style={{
-            background: '#161b22',
-            border: '1px solid #30363d',
+            background: 'var(--color-surface)',
+            border: '1px solid var(--color-border)',
             borderRadius: '8px',
             padding: '24px',
             width: '400px'
           }}>
-            <h3 style={{ color: '#f0f6fc', marginBottom: '16px' }}>
+            <h3 style={{ color: 'var(--color-text)', marginBottom: '16px' }}>
               Neues Projekt erstellen
             </h3>
             <input
@@ -333,11 +333,11 @@ export default function ProjectBoard() {
               onChange={(e) => setNewProjectName(e.target.value)}
               placeholder="Projektname..."
               style={{
-                background: '#0d1117',
-                border: '1px solid #30363d',
+                background: 'var(--color-bg)',
+                border: '1px solid var(--color-border)',
                 borderRadius: '6px',
                 padding: '8px 12px',
-                color: '#c9d1d9',
+                color: 'var(--color-text)',
                 width: '100%',
                 marginBottom: '12px'
               }}
@@ -348,11 +348,11 @@ export default function ProjectBoard() {
               onChange={(e) => setNewProjectDesc(e.target.value)}
               placeholder="Beschreibung (optional)..."
               style={{
-                background: '#0d1117',
-                border: '1px solid #30363d',
+                background: 'var(--color-bg)',
+                border: '1px solid var(--color-border)',
                 borderRadius: '6px',
                 padding: '8px 12px',
-                color: '#c9d1d9',
+                color: 'var(--color-text)',
                 width: '100%',
                 marginBottom: '16px'
               }}
@@ -361,11 +361,11 @@ export default function ProjectBoard() {
               <button
                 onClick={() => setShowNewProject(false)}
                 style={{
-                  background: '#21262d',
-                  border: '1px solid #30363d',
+                  background: 'var(--color-btn-bg)',
+                  border: '1px solid var(--color-border)',
                   borderRadius: '6px',
                   padding: '8px 16px',
-                  color: '#c9d1d9',
+                  color: 'var(--color-text)',
                   cursor: 'pointer'
                 }}
               >
@@ -401,14 +401,14 @@ export default function ProjectBoard() {
           >
             <div 
               className="p-3 border-b flex items-center justify-between"
-              style={{ borderColor: '#30363d' }}
+              style={{ borderColor: 'var(--color-border)' }}
             >
-              <span style={{ color: '#f0f6fc', fontWeight: 600, fontSize: '14px' }}>
+              <span style={{ color: 'var(--color-text)', fontWeight: 600, fontSize: '14px' }}>
                 {column.title}
               </span>
               <span 
                 className="px-2 py-0.5 rounded-full text-xs"
-                style={{ background: '#30363d', color: '#8b949e' }}
+                style={{ background: 'var(--color-border)', color: 'var(--color-muted)' }}
               >
                 {column.items.length}
               </span>
@@ -427,7 +427,7 @@ export default function ProjectBoard() {
                   }}
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <h4 style={{ color: '#f0f6fc', fontSize: '13px', fontWeight: 500, lineHeight: 1.4, flex: 1 }}>
+                    <h4 style={{ color: 'var(--color-text)', fontSize: '13px', fontWeight: 500, lineHeight: 1.4, flex: 1 }}>
                       {item.title}
                     </h4>
                     <div className="flex items-center gap-1">
@@ -441,7 +441,7 @@ export default function ProjectBoard() {
                         style={{
                           background: 'transparent',
                           border: 'none',
-                          color: '#8b949e',
+                          color: 'var(--color-muted)',
                           cursor: 'pointer',
                           fontSize: '12px',
                           padding: '0 4px'
@@ -459,8 +459,8 @@ export default function ProjectBoard() {
                         key={tag}
                         className="px-1.5 py-0.5 rounded text-xs"
                         style={{ 
-                          background: `${TAG_COLORS[tag] || '#8b949e'}20`,
-                          color: TAG_COLORS[tag] || '#8b949e'
+                          background: `${TAG_COLORS[tag] || 'var(--color-muted)'}20`,
+                          color: TAG_COLORS[tag] || 'var(--color-muted)'
                         }}
                       >
                         {tag}
@@ -473,7 +473,7 @@ export default function ProjectBoard() {
               {column.items.length === 0 && (
                 <div 
                   className="text-center py-8"
-                  style={{ color: '#484f58', fontSize: '13px' }}
+                  style={{ color: 'var(--color-muted)', fontSize: '13px' }}
                 >
                   Keine Einträge
                 </div>
