@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>🌟 Nova Dashboard</title>
+    <link rel="stylesheet" href="styles-new.css">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Top Navigation Bar -->
+        <header class="top-nav">
+            <div class="nav-brand">
+                <span class="brand-icon">🌟</span>
+                <span class="brand-text">NOVA</span>
+                <span class="brand-version">v1.2</span>
+            </div>
+            
+            <nav class="nav-tabs">
+                <button class="nav-tab active" data-panel="projects">
+                    <span class="tab-icon">📋</span>
+                    <span class="tab-text">Projekte</span>
+                    <span class="tab-badge" id="project-badge">4</span>
+                </button>
+                <button class="nav-tab" data-panel="notes">
+                    <span class="tab-icon">📝</span>
+                    <span class="tab-text">Notes</span>
+                    <span class="tab-badge" id="notes-badge">0</span>
+                </button>
+                <button class="nav-tab" data-panel="activity">
+                    <span class="tab-icon">📊</span>
+                    <span class="tab-text">Activity</span>
+                </button>
+                <button class="nav-tab" data-panel="settings">
+                    <span class="tab-icon">⚙️</span>
+                    <span class="tab-text">Einstellungen</span>
+                </button>
+            </nav>
+            
+            <div class="nav-status">
+                <div class="status-indicator">
+                    <span class="status-dot online"></span>
+                    <span class="status-text">Online</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="main-container">
+            <!-- Panel: Projects -->
+            <section id="projects-panel" class="content-panel active">
+                <div class="panel-header">
+                    <div class="header-title">
+                        <h1>Projekte</h1>
+                        <p class="header-subtitle">Verwalte alle Projekte und Aufgaben</p>
+                    </div>
+                    <button id="new-project-btn" class="btn btn-primary">
+                        <span>+</span> Neues Projekt
+                    </button>
+                </div>
+
+                <div class="content-grid">
+                    <!-- Projects Overview Cards -->
+                    <div class="stats-row">
+                        <div class="stat-card">
+                            <div class="stat-icon">🎯</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="stat-todo">0</div>
+                                <div class="stat-label">To Do</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⚡</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="stat-progress">0</div>
+                                <div class="stat-label">In Progress</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">👀</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="stat-review">0</div>
+                                <div class="stat-label">Review</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">✅</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="stat-done">0</div>
+                                <div class="stat-label">Done</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kanban Board -->
+                    <div class="kanban-container">
+                        <div class="kanban-column" data-status="todo">
+                            <div class="column-header">
+                                <span class="column-title">🎯 To Do</span>
+                                <span class="column-count" id="todo-count">0</span>
+                            </div>
+                            <div class="column-cards" id="todo-cards"></div>
+                            <button class="add-card-btn">+ Aufgabe hinzufügen</button>
+                        </div>
+
+                        <div class="kanban-column" data-status="inprogress">
+                            <div class="column-header">
+                                <span class="column-title">⚡ In Progress</span>
+                                <span class="column-count" id="inprogress-count">0</span>
+                            </div>
+                            <div class="column-cards" id="inprogress-cards"></div>
+                            <button class="add-card-btn">+ Aufgabe hinzufügen</button>
+                        </div>
+
+                        <div class="kanban-column" data-status="review">
+                            <div class="column-header">
+                                <span class="column-title">👀 Review</span>
+                                <span class="column-count" id="review-count">0</span>
+                            </div>
+                            <div class="column-cards" id="review-cards"></div>
+                            <button class="add-card-btn">+ Aufgabe hinzufügen</button>
+                        </div>
+
+                        <div class="kanban-column" data-status="done">
+                            <div class="column-header">
+                                <span class="column-title">✅ Done</span>
+                                <span class="column-count" id="done-count">0</span>
+                            </div>
+                            <div class="column-cards" id="done-cards"></div>
+                            <button class="add-card-btn">+ Aufgabe hinzufügen</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Panel: Notes -->
+            <section id="notes-panel" class="content-panel">
+                <div class="panel-header">
+                    <div class="header-title">
+                        <h1>Notes</h1>
+                        <p class="header-subtitle">Nachrichten und Erinnerungen für Nova</p>
+                    </div>
+                </div>
+
+                <div class="content-grid">
+                    <!-- New Note Card -->
+                    <div class="card card-full">
+                        <div class="card-header">
+                            <h3>📝 Neue Note</h3>
+                        </div>
+                        <div class="card-body">
+                            <textarea id="note-input" class="input-field" rows="4" placeholder="Schreibe eine Nachricht für Nova..."></textarea>
+                            <div class="input-row">
+                                <select id="note-priority" class="input-select">
+                                    <option value="low">🔵 Niedrige Priorität</option>
+                                    <option value="normal" selected>⚪ Normale Priorität</option>
+                                    <option value="high">🔴 Hohe Priorität</option>
+                                </select>
+                                <button id="save-note" class="btn btn-primary">Speichern</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notes Filter -->
+                    <div class="filter-bar">
+                        <button class="filter-pill active" data-filter="all">Alle Notes</button>
+                        <button class="filter-pill" data-filter="unseen">🆕 Neu</button>
+                        <button class="filter-pill" data-filter="seen">👀 Gesehen</button>
+                        <button class="filter-pill" data-filter="processed">✅ Erledigt</button>
+                    </div>
+
+                    <!-- Notes List -->
+                    <div class="cards-grid" id="notes-grid">
+                        <!-- Notes werden hier geladen -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Panel: Activity -->
+            <section id="activity-panel" class="content-panel">
+                <div class="panel-header">
+                    <div class="header-title">
+                        <h1>Activity</h1>
+                        <p class="header-subtitle">System-Status und Aktivitäts-Log</p>
+                    </div>
+                    <button id="refresh-activity" class="btn btn-secondary">🔄 Aktualisieren</button>
+                </div>
+
+                <div class="content-grid">
+                    <!-- Metrics Cards -->
+                    <div class="stats-row">
+                        <div class="stat-card stat-large">
+                            <div class="stat-icon">📋</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="metric-projects">0</div>
+                                <div class="stat-label">Gesamt Projekte</div>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-large">
+                            <div class="stat-icon">📝</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="metric-notes">0</div>
+                                <div class="stat-label">Gesamt Notes</div>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-large">
+                            <div class="stat-icon">🕐</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="metric-last">-</div>
+                                <div class="stat-label">Letzte Aktivität</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Activity Log -->
+                    <div class="card card-full">
+                        <div class="card-header">
+                            <h3>📜 Aktivitäts-Log</h3>
+                            <div class="card-actions">
+                                <label class="check-pill">
+                                    <input type="checkbox" id="filter-sessions" checked> Sessions
+                                </label>
+                                <label class="check-pill">
+                                    <input type="checkbox" id="filter-tools" checked> Tools
+                                </label>
+                                <label class="check-pill">
+                                    <input type="checkbox" id="filter-errors" checked> Errors
+                                </label>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="activity-list" id="activity-log">
+                                <!-- Logs werden hier geladen -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Panel: Settings -->
+            <section id="settings-panel" class="content-panel">
+                <div class="panel-header">
+                    <div class="header-title">
+                        <h1>Einstellungen</h1>
+                        <p class="header-subtitle">Dashboard-Einstellungen und System-Info</p>
+                    </div>
+                </div>
+
+                <div class="content-grid">
+                    <div class="settings-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>🎨 Erscheinungsbild</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="setting-item">
+                                    <label>Theme</label>
+                                    <select id="theme-select" class="input-select">
+                                        <option value="dark">Dark Mode</option>
+                                        <option value="light">Light Mode</option>
+                                        <option value="auto">System (Auto)</option>
+                                    </select>
+                                </div>
+                                <div class="setting-item">
+                                    <label>Auto-Refresh</label>
+                                    <select id="refresh-interval" class="input-select">
+                                        <option value="10">Alle 10 Sekunden</option>
+                                        <option value="30" selected>Alle 30 Sekunden</option>
+                                        <option value="60">Alle 60 Sekunden</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>💾 Daten</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="setting-item">
+                                    <label>Dashboard Version</label>
+                                    <span class="setting-value">v1.2.0</span>
+                                </div>
+                                <div class="setting-item">
+                                    <label>Letzte Änderung</label>
+                                    <span class="setting-value" id="last-update">2026-02-05</span>
+                                </div>
+                                <div class="button-group">
+                                    <button id="export-data" class="btn btn-secondary">📥 Exportieren</button>
+                                    <button id="clear-data" class="btn btn-danger">🗑️ Alles löschen</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal: New/Edit Project -->
+    <div id="project-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Neues Projekt</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Titel</label>
+                    <input type="text" id="project-title" class="input-field" placeholder="Projekttitel eingeben...">
+                </div>
+                <div class="form-group">
+                    <label>Beschreibung</label>
+                    <textarea id="project-desc" class="input-field" rows="3" placeholder="Beschreibung..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Priorität</label>
+                        <select id="project-priority" class="input-select">
+                            <option value="low">🔵 Niedrig</option>
+                            <option value="normal" selected>⚪ Normal</option>
+                            <option value="high">🔴 Hoch</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="project-status" class="input-select">
+                            <option value="todo">🎯 To Do</option>
+                            <option value="inprogress">⚡ In Progress</option>
+                            <option value="review">👀 Review</option>
+                            <option value="done">✅ Done</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-project" class="btn btn-secondary">Abbrechen</button>
+                <button id="save-project" class="btn btn-primary">Speichern</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js?v=2"></script>
+</body>
+</html>
