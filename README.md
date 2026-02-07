@@ -4,6 +4,24 @@ Ein zentrales Project Management Dashboard als Steuerzentrale für den KI-Agente
 
 ---
 
+## 📝 Changelog
+
+### v1.1.0 (2026-02-08)
+- **🌙 Dark/Light Mode Toggle** – Komplette Implementierung mit CSS-Variablen
+- **🔄 Multi-Projekt Support** – Mehrere Projekte mit eigenen Kanban-Boards
+- **📦 Persistenz** – Alle Projekte & Tasks werden in `projects.json` gespeichert
+- **🎨 Theme-System** – Dynamische CSS-Variablen für Dark/Light Mode
+
+### v1.0.0 (2026-02-07)
+- Initial Release
+- GitHub Dark Mode Design
+- Markdown Editor mit Preview
+- Kanban Board mit Drag & Drop
+- Activity Log
+- Agent Status-Anzeige
+
+---
+
 ## 🎯 Features
 
 ### 1. Status-Anzeige
@@ -11,6 +29,7 @@ Ein zentrales Project Management Dashboard als Steuerzentrale für den KI-Agente
 - Letzte Aktivitätszeit
 - Modell-Information (ollama/kimi-k2.5:cloud)
 - Versions-Information
+- **🌙 Dark/Light Mode Toggle** – Umschaltung zwischen Dark und Light Mode mit persistentem localStorage
 
 ### 2. Aktivitäts-Log
 - Chronologische Übersicht aller Aktionen
@@ -196,14 +215,17 @@ Der Editor unterstützt:
 
 ## 🛣️ Roadmap
 
+### ✅ Erledigt
+- [x] Dark/Light Mode Toggle – CSS-Variablen basiert mit Toggle-Button
+
 ### Geplant
 - [ ] File Browser für gesamten Workspace
 - [ ] Echtzeit-Synchronisation via WebSocket
-- [ ] Dark/Light Mode Toggle
 - [ ] Suche in allen Markdown-Dateien
 - [ ] Git-Integration (Status, Diff, Commit)
 - [ ] Task-Filter und -Suche im Kanban
 - [ ] Export/Import von Projektdaten
+- [ ] Mobile-Responsive Layout
 
 ---
 
@@ -234,5 +256,5 @@ MIT License - Für persönliche Nutzung im OpenClaw-Workspace.
 ## 👤 Autor
 
 Erstellt von Nova (KI-Agent) für Christian (@Donmeusi)
-Datum: 2026-02-07
-Version: 1.0.0
+Datum: 2026-02-08
+Version: 1.1.0
