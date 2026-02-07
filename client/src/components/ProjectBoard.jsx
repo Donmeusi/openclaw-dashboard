@@ -15,6 +15,9 @@ const TAG_COLORS = {
   design: '#ff7b72',
   docs: '#8b949e',
   setup: '#3fb950',
+  ux: '#d29922',
+  integration: '#39d0d8',
+  new: '#6e7681',
 };
 
 const INITIAL_COLUMNS = {
