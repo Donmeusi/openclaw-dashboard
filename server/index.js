@@ -110,8 +110,9 @@ app.get('/api/files', async (req, res) => {
   }
 });
 
-// Read file content
-app.get('/api/files/:filename', async (req, res) => {
+// Core files route (for MEMORY.md, SOUL.md, etc.)
+// NEW: Separate route to avoid collision with File Browser
+app.get('/api/core/:filename', async (req, res) => {
   try {
     const { filename } = req.params;
     const safeFilename = path.basename(filename);
@@ -121,6 +122,21 @@ app.get('/api/files/:filename', async (req, res) => {
     res.json({ name: safeFilename, content });
   } catch (error) {
     res.status(404).json({ error: 'File not found' });
+  }
+});
+
+// Write core file content
+app.post('/api/core/:filename', async (req, res) => {
+  try {
+    const { filename } = req.params;
+    const { content } = req.body;
+    const safeFilename = path.basename(filename);
+    const filePath = path.join(WORKSPACE_PATH, safeFilename);
+    
+    await fs.writeFile(filePath, content, 'utf-8');
+    res.json({ success: true, name: safeFilename });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -535,14 +551,22 @@ function safeJoin(base, target) {
 }
 
 // File Browser API - List files in project
-app.get('/api/files/:projectId/*', async (req, res) => {
+// File Browser handler (used by both routes)
+async function fileBrowserHandler(req, res) {
   try {
     const { projectId } = req.params;
-    const filePath = req.params[0] || '';
+    // Use path set by route handler, not raw params[0]
+    const filePath = req.params.path || '';
+    
+    console.log(`[FileBrowser] project=${projectId}, path="${filePath}"`);
+    
+    console.log(`[FileBrowser] Request: project=${projectId}, path="${filePath}"`);
     
     // Get project
     const data = await loadProjects();
     const project = data.projects.find(p => p.id === projectId);
+    
+    console.log(`[FileBrowser] Found project: ${project ? 'YES' : 'NO'}, has path: ${project?.projectPath ? 'YES' : 'NO'}`);
     
     if (!project || !project.projectPath) {
       return res.status(404).json({ error: 'Project not found or no projectPath' });
@@ -550,6 +574,7 @@ app.get('/api/files/:projectId/*', async (req, res) => {
     
     // Safe path construction
     const fullPath = safeJoin(project.projectPath, filePath);
+    console.log(`[FileBrowser] Full path: ${fullPath}`);
     
     const stats = await fs.stat(fullPath);
     
@@ -588,6 +613,15 @@ app.get('/api/files/:projectId/*', async (req, res) => {
     }
     res.status(500).json({ error: error.message });
   }
+}
+
+// Register File Browser route - handles ALL variants
+// /api/files/:id, /api/files/:id/, /api/files/:id/path
+app.get('/api/files/:projectId*', async (req, res) => {
+  const extraPath = req.params[0] || '';
+  // Remove leading/trailing slashes
+  req.params.path = extraPath.replace(/^\//, '').replace(/\/$/, '');
+  await fileBrowserHandler(req, res);
 });
 
 // Create features directory for a project (if using Alex-style)

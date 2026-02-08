@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import StatusBar from './components/StatusBar';
 import FileEditor from './components/FileEditor';
+import FileBrowser from './components/FileBrowser';
 import ActivityLog from './components/ActivityLog';
 import ProjectBoard from './components/ProjectBoard';
 import { fetchStatus, fetchFiles } from './utils/api';
@@ -70,15 +71,18 @@ function App() {
       <div className="flex-1 flex flex-col overflow-hidden">
         <StatusBar status={status} theme={theme} onToggleTheme={toggleTheme} />
         
-        <main className="flex-1 overflow-auto p-6">
+        <main className="flex-1 overflow-auto p-0">
           {activeTab === 'editor' && (
-            <FileEditor filename={selectedFile} />
+            <div className="p-6"><FileEditor filename={selectedFile} /></div>
+          )}
+          {activeTab === 'browser' && (
+            <FileBrowser />
           )}
           {activeTab === 'activity' && (
-            <ActivityLog />
+            <div className="p-6"><ActivityLog /></div>
           )}
           {activeTab === 'projects' && (
-            <ProjectBoard />
+            <div className="p-6"><ProjectBoard /></div>
           )}
         </main>
       </div>

@@ -37,6 +37,13 @@ export default function Sidebar({ activeTab, setActiveTab, files, selectedFile, 
             📝 Editor
           </button>
           <button
+            onClick={() => setActiveTab('browser')}
+            className={`sidebar-link w-full text-left ${activeTab === 'browser' ? 'active' : ''}`}
+            style={{ color: 'var(--color-text)' }}
+          >
+            🗂️ File Browser
+          </button>
+          <button
             onClick={() => setActiveTab('activity')}
             className={`sidebar-link w-full text-left ${activeTab === 'activity' ? 'active' : ''}`}
             style={{ color: 'var(--color-text)' }}

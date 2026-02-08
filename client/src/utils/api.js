@@ -20,9 +20,16 @@ export async function fetchMemory() {
 
 export async function fetchFileContent(filename) {
   const isMemoryFile = filename.startsWith('memory/');
-  const endpoint = isMemoryFile 
-    ? `${API_BASE}/memory/${filename.replace('memory/', '')}`
-    : `${API_BASE}/files/${filename}`;
+  const isCoreFile = !isMemoryFile && !filename.includes('/');  // Core files have no path separator
+  
+  let endpoint;
+  if (isMemoryFile) {
+    endpoint = `${API_BASE}/memory/${filename.replace('memory/', '')}`;
+  } else if (isCoreFile) {
+    endpoint = `${API_BASE}/core/${filename}`;  // NEW: Core files route
+  } else {
+    endpoint = `${API_BASE}/files/${filename}`;
+  }
   
   const res = await fetch(endpoint);
   if (!res.ok) throw new Error('File fetch failed');
@@ -30,7 +37,12 @@ export async function fetchFileContent(filename) {
 }
 
 export async function saveFile(filename, content) {
-  const res = await fetch(`${API_BASE}/files/${filename}`, {
+  const isCoreFile = !filename.includes('/');  // Core files have no path separator
+  const endpoint = isCoreFile 
+    ? `${API_BASE}/core/${filename}`  // NEW: Core files route
+    : `${API_BASE}/files/${filename}`;
+  
+  const res = await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ content }),
