@@ -6,11 +6,20 @@ Ein zentrales Project Management Dashboard als Steuerzentrale für den KI-Agente
 
 ## 📝 Changelog
 
+### v1.2.0 (2026-02-08) - Alex-Kompatibilität + File Browser
+- **🗂️ File Browser** – Vollständiger Datei-Browser für alle Projekte
+- **📁 Core Files API** – Separate API für MEMORY.md, SOUL.md, etc. (`/api/core/:filename`)
+- **🔗 Alex-PEClub Kompatibilität** – `projectPath` Support für openclaw_react_board
+- **🎨 Syntax Highlighting** – JS, JSON, Markdown, SQL im File Browser
+- **🔒 Path Traversal Schutz** – `safeJoin()` für sichere Datei-Operationen
+- **🗂️ Features Ordner** – Automatische `features/` Ordner Erstellung
+
 ### v1.1.0 (2026-02-08)
 - **🌙 Dark/Light Mode Toggle** – Komplette Implementierung mit CSS-Variablen
 - **🔄 Multi-Projekt Support** – Mehrere Projekte mit eigenen Kanban-Boards
 - **📦 Persistenz** – Alle Projekte & Tasks werden in `projects.json` gespeichert
 - **🎨 Theme-System** – Dynamische CSS-Variablen für Dark/Light Mode
+- **🔍 Auto-Discovery** – Automatische Projekterkennung via README.md
 
 ### v1.0.0 (2026-02-07)
 - Initial Release
@@ -62,6 +71,19 @@ Ein zentrales Project Management Dashboard als Steuerzentrale für den KI-Agente
 - Prioritäts-Marker (Hoch/Mittel/Niedrig)
 - Tags für Kategorisierung
 - Schnelles Hinzufügen neuer Tasks
+- **🔍 Auto-Discovery** – Projekte werden automatisch aus `~/workspace/projects/*/README.md` erkannt
+
+### 5. File Browser 🗂️ (NEU in v1.2.0)
+- **Projekt-Auswahl** – Dropdown für alle verfügbaren Projekte
+- **Verzeichnis-Browsing** – Navigation durch Ordnerstruktur
+- **Datei-Anzeige** – Direkte Ansicht von Dateiinhalten
+- **Syntax Highlighting** für:
+  - JavaScript/TypeScript
+  - JSON
+  - Markdown (Headers hervorgehoben)
+  - SQL
+- **Icons** – Ordner vs. Datei visuell unterschieden
+- **Breadcrumb** – Zeigt aktuellen Pfad an
 
 ---
 
@@ -71,11 +93,13 @@ Ein zentrales Project Management Dashboard als Steuerzentrale für den KI-Agente
 - **React** 18.2.0
 - **Vite** 5.4.21 (Build-Tool)
 - **Tailwind CSS** (via CDN)
+- **lucide-react** – Icons
 - System-Fonts (GitHub-Style)
 
 ### Backend
 - **Node.js** + **Express** 4.18.2
 - **CORS** für Cross-Origin Requests
+- **chokidar** – File Watching für Auto-Discovery
 - Dateisystem-API für Workspace-Zugriff
 
 ### Design
@@ -107,9 +131,10 @@ dashboard/
 │       ├── utils/
 │       │   └── api.js        # API-Helper
 │       └── components/
-│           ├── Sidebar.jsx       # Navigation
+│           ├── Sidebar.jsx       # Navigation (+ File Browser Tab)
 │           ├── StatusBar.jsx     # Status-Anzeige
-│           ├── FileEditor.jsx    # Markdown Editor
+│           ├── FileEditor.jsx    # Markdown Editor (Core Files)
+│           ├── FileBrowser.jsx   # 🗂️ File Browser (Phase B)
 │           ├── ActivityLog.jsx   # Aktivitäts-History
 │           └── ProjectBoard.jsx  # Kanban Board
 ├── package.json              # Root Dependencies
@@ -164,14 +189,36 @@ cd client && npm start
 
 ## 🔌 API-Endpunkte
 
+### Core Files (NEU in v1.2.0)
+| Methode | Endpoint | Beschreibung |
+|---------|----------|--------------|
+| GET | `/api/core/:filename` | Core-Datei lesen (MEMORY.md, SOUL.md, etc.) |
+| POST | `/api/core/:filename` | Core-Datei speichern |
+
+### File Browser (NEU in v1.2.0)
+| Methode | Endpoint | Beschreibung |
+|---------|----------|--------------|
+| GET | `/api/files/:projectId` | Projekt-Root auflisten |
+| GET | `/api/files/:projectId/*` | Datei/Verzeichnis anzeigen |
+| POST | `/api/projects/:id/init-features` | `features/` Ordner erstellen |
+
+### Bestehende Endpunkte
 | Methode | Endpoint | Beschreibung |
 |---------|----------|--------------|
 | GET | `/api/status` | Agent-Status abrufen |
-| GET | `/api/files` | Liste der Core-Dateien |
-| GET | `/api/files/:filename` | Dateiinhalt lesen |
-| POST | `/api/files/:filename` | Datei speichern |
+| GET | `/api/files` | Liste der Core-Dateien (legacy) |
 | GET | `/api/memory` | Memory-Log-Dateien |
 | GET | `/api/memory/:filename` | Memory-Datei lesen |
+| GET | `/api/projects` | Alle Projekte abrufen |
+| GET | `/api/projects/:id` | Einzelnes Projekt abrufen |
+| POST | `/api/projects/create` | Neues Projekt erstellen |
+| POST | `/api/projects/:id` | Projekt speichern (Kanban) |
+| POST | `/api/projects/active/:id` | Aktives Projekt setzen |
+| DELETE | `/api/projects/:id` | Projekt löschen |
+| GET | `/api/activities` | Aktivitäts-Log abrufen |
+| POST | `/api/activities` | Neue Aktivität hinzufügen |
+| GET | `/api/activity` | Alias für `/api/activities` (Alex-Compat) |
+| POST | `/api/admin/scan-projects` | Manuelle Projekt-Scan |
 
 ---
 
@@ -207,9 +254,10 @@ Der Editor unterstützt:
 
 ## 🔒 Sicherheit
 
-- **Path Traversal Protection:** Alle Dateipfade werden mit `path.basename()` bereinigt
+- **Path Traversal Protection:** Alle Dateipfade werden mit `safeJoin()` bereinigt
 - **CORS:** Aktiviert für localhost-Entwicklung
-- **Workspace-Isolation:** Zugriff nur auf konfigurierten Workspace-Pfad (in `server/index.js` anpassbar)
+- **Workspace-Isolation:** Zugriff nur auf konfigurierten Workspace-Pfad
+- **Project-Bound Paths:** File Browser kann nur innerhalb von `projectPath` navigieren
 
 ---
 
@@ -217,9 +265,15 @@ Der Editor unterstützt:
 
 ### ✅ Erledigt
 - [x] Dark/Light Mode Toggle – CSS-Variablen basiert mit Toggle-Button
+- [x] **File Browser** – Vollständiger Datei-Browser mit Syntax Highlighting
+- [x] **Core Files API** – Separate API für Workspace-Root Dateien
+- [x] **Alex-PEClub Kompatibilität** – `projectPath` und API-Alias
+- [x] **Auto-Discovery** – Automatische Projekterkennung
+- [x] **Multi-Projekt Support** – Mehrere Projekte mit Kanban-Boards
 
 ### Geplant
-- [ ] File Browser für gesamten Workspace
+- [ ] Syntax Highlighting erweitern (Zeilennummern, mehr Sprachen)
+- [ ] Tree-View statt flacher Liste im File Browser
 - [ ] Echtzeit-Synchronisation via WebSocket
 - [ ] Suche in allen Markdown-Dateien
 - [ ] Git-Integration (Status, Diff, Commit)
@@ -236,7 +290,12 @@ Der Editor unterstützt:
 # Prozesse auf Port 3000/3001 beenden
 lsof -ti:3000 | xargs kill -9
 lsof -ti:3001 | xargs kill -9
+# oder
+pkill -9 node
 ```
+
+### Firefox kann localhost nicht erreichen
+Nutze stattdessen: `http://127.0.0.1:3000`
 
 ### 404 beim Öffnen des Editors
 Überprüfe, ob die Datei im Workspace existiert:
@@ -255,6 +314,6 @@ MIT License - Für persönliche Nutzung im OpenClaw-Workspace.
 
 ## 👤 Autor
 
-Erstellt von Nova (KI-Agent) für Christian (@Donmeusi)
-Datum: 2026-02-08
-Version: 1.1.0
+Erstellt von Nova (KI-Agent) für Christian (@Donmeusi)  
+Datum: 2026-02-08  
+Version: 1.2.0
