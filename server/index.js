@@ -353,6 +353,12 @@ app.get('/api/activities', async (req, res) => {
   }
 });
 
+// API Alias for Alex-compatibility
+app.get('/api/activity', async (req, res) => {
+  req.url = '/api/activities';
+  app._router.handle(req, res);
+});
+
 // Add new activity
 app.post('/api/activities', async (req, res) => {
   try {
@@ -435,6 +441,7 @@ async function createDiscoveredProject(projectPath) {
       id: projectId,
       name: `📁 ${name}`,
       description,
+      projectPath: projectPath,  // ← Alex-compatibility
       createdAt: new Date().toISOString(),
       autoDiscovered: true,
       columns: createDefaultColumns()
@@ -516,11 +523,112 @@ app.post('/api/admin/scan-projects', async (req, res) => {
   }
 });
 
-// Start server
+// ============ FILE BROWSER (Alex-Compatibility) ============
+
+// Safe path join helper
+function safeJoin(base, target) {
+  const result = path.join(base, target);
+  if (!result.startsWith(base)) {
+    throw new Error('Path traversal detected');
+  }
+  return result;
+}
+
+// File Browser API - List files in project
+app.get('/api/files/:projectId/*', async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const filePath = req.params[0] || '';
+    
+    // Get project
+    const data = await loadProjects();
+    const project = data.projects.find(p => p.id === projectId);
+    
+    if (!project || !project.projectPath) {
+      return res.status(404).json({ error: 'Project not found or no projectPath' });
+    }
+    
+    // Safe path construction
+    const fullPath = safeJoin(project.projectPath, filePath);
+    
+    const stats = await fs.stat(fullPath);
+    
+    if (stats.isDirectory()) {
+      // List directory contents
+      const items = await fs.readdir(fullPath, { withFileTypes: true });
+      const formatted = items.map(item => ({
+        name: item.name,
+        type: item.isDirectory() ? 'directory' : 'file',
+        path: path.join(filePath, item.name)
+      }));
+      
+      res.json({
+        type: 'directory',
+        path: filePath || '/',
+        items: formatted
+      });
+    } else {
+      // Read file content
+      const content = await fs.readFile(fullPath, 'utf-8');
+      const ext = path.extname(fullPath).slice(1);
+      
+      res.json({
+        type: 'file',
+        name: path.basename(fullPath),
+        path: filePath,
+        extension: ext,
+        content,
+        size: stats.size,
+        lastModified: stats.mtime
+      });
+    }
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({ error: 'Not found' });
+    }
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Create features directory for a project (if using Alex-style)
+app.post('/api/projects/:id/init-features', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = await loadProjects();
+    const project = data.projects.find(p => p.id === id);
+    
+    if (!project || !project.projectPath) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+    
+    const featuresDir = path.join(project.projectPath, 'features');
+    await fs.mkdir(featuresDir, { recursive: true });
+    
+    // Create a sample feature file
+    const sampleFile = path.join(featuresDir, 'README.md');
+    await fs.writeFile(sampleFile, `# Features
+
+Feature-Spezifikationen für ${project.name}.
+
+## Konvention
+- PROJ-1-feature-name.md
+- Markdown format
+- Tasks können verknüpft werden
+`, 'utf-8');
+    
+    res.json({ success: true, featuresPath: featuresDir });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============ START SERVER ============
+
 app.listen(PORT, () => {
   console.log(`🚀 OpenClaw Dashboard API running on http://localhost:${PORT}`);
   
   // Initialize auto-discovery
   initProjectWatcher();
   console.log('[Auto-Discovery] ✅ Initialized');
+  console.log('[Alex-Compat] ✅ File Browser API ready');
 });
