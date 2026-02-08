@@ -7,6 +7,7 @@ const app = express();
 const PORT = 3001;
 const WORKSPACE_PATH = '/Users/donmeusi/.openclaw/workspace';
 const PROJECTS_FILE = path.join(WORKSPACE_PATH, 'dashboard', 'projects.json');
+const ACTIVITY_FILE = path.join(WORKSPACE_PATH, 'dashboard', 'activity.json');
 
 // Default empty columns structure
 const createDefaultColumns = () => ({
@@ -316,6 +317,60 @@ app.delete('/api/projects/:id', async (req, res) => {
     
     await saveProjects(data);
     res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============= ACTIVITY LOG API =============
+
+// Load activities
+async function loadActivities() {
+  try {
+    const data = await fs.readFile(ACTIVITY_FILE, 'utf-8');
+    return JSON.parse(data);
+  } catch {
+    return { activities: [] };
+  }
+}
+
+// Save activities
+async function saveActivities(data) {
+  await fs.writeFile(ACTIVITY_FILE, JSON.stringify(data, null, 2), 'utf-8');
+}
+
+// Get all activities
+app.get('/api/activities', async (req, res) => {
+  try {
+    const { limit = 50 } = req.query;
+    const data = await loadActivities();
+    const sorted = data.activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    res.json({ activities: sorted.slice(0, parseInt(limit)) });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Add new activity
+app.post('/api/activities', async (req, res) => {
+  try {
+    const { type, title, description, project } = req.body;
+    const data = await loadActivities();
+    
+    const newActivity = {
+      id: 'act-' + Date.now(),
+      type: type || 'edit',
+      title: title || 'Aktivität',
+      description: description || '',
+      project: project || 'default',
+      timestamp: new Date().toISOString(),
+      user: 'Nova'
+    };
+    
+    data.activities.push(newActivity);
+    await saveActivities(data);
+    
+    res.status(201).json(newActivity);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
