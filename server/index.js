@@ -2,10 +2,12 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs').promises;
 const path = require('path');
+const chokidar = require(path.join(__dirname, '..', 'node_modules', 'chokidar'));
 
 const app = express();
 const PORT = 3001;
 const WORKSPACE_PATH = '/Users/donmeusi/.openclaw/workspace';
+const PROJECTS_DIR = path.join(WORKSPACE_PATH, 'projects');
 const PROJECTS_FILE = path.join(WORKSPACE_PATH, 'dashboard', 'projects.json');
 const ACTIVITY_FILE = path.join(WORKSPACE_PATH, 'dashboard', 'activity.json');
 
@@ -376,6 +378,149 @@ app.post('/api/activities', async (req, res) => {
   }
 });
 
+// ============ AUTO-DISCOVERY ============
+
+// Extract project info from README
+function extractProjectInfo(readmeContent, projectId) {
+  const lines = readmeContent.split('\n').filter(l => l.trim());
+  
+  // First # line = title
+  const titleMatch = lines.find(l => l.startsWith('# '));
+  const name = titleMatch ? titleMatch.replace('# ', '').trim() : projectId;
+  
+  // Next non-empty, non-header line = description
+  const descLine = lines.find(l => l.trim() && !l.startsWith('#') && !l.startsWith('---'));
+  const description = descLine ? descLine.trim().slice(0, 200) : '';
+  
+  return { name, description };
+}
+
+// Check if project already exists
+async function projectExists(projectId) {
+  try {
+    const data = await loadProjects();
+    return data.projects.some(p => p.id === projectId);
+  } catch {
+    return false;
+  }
+}
+
+// Create project from discovered directory
+async function createDiscoveredProject(projectPath) {
+  const projectId = path.basename(projectPath);
+  
+  if (await projectExists(projectId)) {
+    return null; // Already exists
+  }
+  
+  try {
+    // Read README
+    const readmePath = path.join(projectPath, 'README.md');
+    let name = projectId;
+    let description = 'Auto-discovered project';
+    
+    try {
+      const readme = await fs.readFile(readmePath, 'utf-8');
+      const info = extractProjectInfo(readme, projectId);
+      name = info.name;
+      description = info.description;
+    } catch {
+      // No README, use defaults
+    }
+    
+    // Create project
+    const projectsData = await loadProjects();
+    
+    const newProject = {
+      id: projectId,
+      name: `📁 ${name}`,
+      description,
+      createdAt: new Date().toISOString(),
+      autoDiscovered: true,
+      columns: createDefaultColumns()
+    };
+    
+    projectsData.projects.push(newProject);
+    await saveProjects(projectsData);
+    
+    // Log activity
+    const activityData = await loadActivities();
+    activityData.activities.push({
+      id: 'act-' + Date.now(),
+      type: 'create',
+      title: `🔍 Auto-entdeckt: ${name}`,
+      description: `Projekt aus ${PROJECTS_DIR}/${projectId} automatisch hinzugefügt`,
+      project: projectId,
+      timestamp: new Date().toISOString(),
+      user: 'Nova'
+    });
+    await saveActivities(activityData);
+    
+    console.log(`[Auto-Discovery] ✅ Created project: ${name} (${projectId})`);
+    return newProject;
+    
+  } catch (error) {
+    console.error(`[Auto-Discovery] ❌ Error creating project ${projectId}:`, error.message);
+    return null;
+  }
+}
+
+// Initialize file watcher
+function initProjectWatcher() {
+  // Ensure projects directory exists
+  fs.mkdir(PROJECTS_DIR, { recursive: true }).catch(() => {});
+  
+  const watcher = chokidar.watch(`${PROJECTS_DIR}/*/README.md`, {
+    ignored: /node_modules/,
+    persistent: true,
+    depth: 2
+  });
+  
+  watcher
+    .on('add', async (filePath) => {
+      const projectPath = path.dirname(filePath);
+      await createDiscoveredProject(projectPath);
+    })
+    .on('change', async (filePath) => {
+      // README updated - could sync name/description
+      console.log(`[Auto-Discovery] 📝 README updated: ${filePath}`);
+    })
+    .on('unlink', async (filePath) => {
+      console.log(`[Auto-Discovery] 🗑️ README removed: ${filePath}`);
+    });
+  
+  console.log(`[Auto-Discovery] 👁️ Watching: ${PROJECTS_DIR}/*/`);
+  return watcher;
+}
+
+// Manual trigger endpoint (for testing)
+app.post('/api/admin/scan-projects', async (req, res) => {
+  try {
+    const entries = await fs.readdir(PROJECTS_DIR, { withFileTypes: true });
+    const projects = [];
+    
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        const created = await createDiscoveredProject(path.join(PROJECTS_DIR, entry.name));
+        if (created) projects.push(created);
+      }
+    }
+    
+    res.json({ 
+      scanned: entries.length,
+      created: projects.length,
+      projects: projects.map(p => ({ id: p.id, name: p.name }))
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Start server
 app.listen(PORT, () => {
-  console.log(`OpenClaw Dashboard API running on http://localhost:${PORT}`);
+  console.log(`🚀 OpenClaw Dashboard API running on http://localhost:${PORT}`);
+  
+  // Initialize auto-discovery
+  initProjectWatcher();
+  console.log('[Auto-Discovery] ✅ Initialized');
 });
